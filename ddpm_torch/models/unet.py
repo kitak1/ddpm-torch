@@ -1,6 +1,8 @@
 import math
 import torch
 import torch.nn as nn
+from diffusers import AutoencoderKL  # VAEをロードするために追加
+
 try:
     from ..functions import get_timestep_embedding
     from ..modules import Linear, Conv2d, SamePad2d, Sequential
@@ -231,6 +233,53 @@ class UNet(nn.Module):
 
         h = self.out_conv(h)
         return h
+    
+class LatentDiffusionModel(nn.Module):
+    """
+    VAEとU-Netを統合し、Latent Diffusion Modelとして機能させるためのラッパークラス。
+    """
+    def __init__(self, vae_name_or_path: str, unet_config: dict):
+        super().__init__()
+        
+        # 1. 事前学習済みのVAEをロードし、重みをフリーズ（学習させない）
+        print(f"Loading VAE from {vae_name_or_path}...")
+        self.vae = AutoencoderKL.from_pretrained(vae_name_or_path)
+        self.vae.requires_grad_(False)
+        
+        # VAEの潜在空間のチャンネル数を取得 (通常は4)
+        latent_channels = self.vae.config.latent_channels
+        
+        # 2. U-Netの設定を潜在空間に合わせる
+        unet_config['in_channels'] = latent_channels
+        unet_config['out_channels'] = latent_channels # ノイズを予測するため、チャンネル数は同じ
+        
+        # 3. U-Netをインスタンス化
+        self.unet = UNet(**unet_config)
+        
+        # LDM論文で導入されたスケーリングファクター。VAEの出力の分散を調整する。
+        # データセットから計算するのが理想だが、ここでは定数としておく。
+        self.scale_factor = 0.18215 # Stable Diffusionで使われている値
+
+    @torch.no_grad()
+    def encode(self, x):
+        """画像をVAEで潜在表現にエンコードする"""
+        # .latent_dist.sample() を使うことで、VAEの確率的なエンコーディングを行う
+        z = self.vae.encode(x).latent_dist.sample()
+        return z * self.scale_factor
+
+    @torch.no_grad()
+    def decode(self, z):
+        """潜在表現をVAEで画像にデコードする"""
+        z = z / self.scale_factor
+        x = self.vae.decode(z).sample
+        return x
+
+    def forward(self, noisy_latents, timesteps):
+        """
+        学習時のフォワードパス。
+        ノイズ付加済みの潜在表現とタイムステップを受け取り、ノイズを予測する。
+        """
+        return self.unet(noisy_latents, timesteps)
 
 
 if __name__ == "__main__":

@@ -12,6 +12,11 @@ from torch.distributed.elastic.multiprocessing import errors
 from torch.nn.parallel import DistributedDataParallel as DDP  # noqa
 from torch.optim import Adam, lr_scheduler
 
+# パラメータ数を数える関数
+def count_parameters(model):
+    return sum(param.numel() for param in model.parameters() if param.requires_grad)
+
+
 
 def train(rank=0, args=None, temp_dir=""):
     distributed = args.distributed
@@ -66,7 +71,11 @@ def train(rank=0, args=None, temp_dir=""):
     model_config["in_channels"] = in_channels * block_size ** 2
     model_config["out_channels"] = out_channels * block_size ** 2
     _model = UNet(**model_config)
-    print(_model.parameters())
+    if torch.__version__[0] == "2":
+        print("torch.compile(_model)")
+        _model = torch.compile(_model)
+    # 表示
+    print(f"Total trainable parameters: {count_parameters(_model)}")
 
     if block_size > 1:
         pre_transform = torch.nn.PixelUnshuffle(block_size)  # space-to-depth

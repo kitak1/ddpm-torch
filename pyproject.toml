@@ -5,6 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "accelerate>=1.11.0",
+    "diffusers>=0.35.2",
     "editables>=0.5",
     "hatchling>=1.27.0",
     "kagglehub>=0.3.12",

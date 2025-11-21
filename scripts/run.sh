@@ -11,4 +11,4 @@
 apptainer exec ../pytorch-2506-fixed.sif 
 
 mkdir -p slurm_logs
-uv run train.py --dataset celeba_hq --batch-size 32 --num-accum 2 --train-device cuda:0 --epochs 1
+uv run train.py --dataset celeba_hq --batch-size 32 --num-accum 2 --train-device cuda:0 --epochs 10 --image-intv 1
