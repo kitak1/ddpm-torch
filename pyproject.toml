@@ -1,0 +1,50 @@
+[project]
+name = "ddpm-torch"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "editables>=0.5",
+    "hatchling>=1.27.0",
+    "kagglehub>=0.3.12",
+    "matplotlib>=3.10.3",
+    "numpy>=2.2.6",
+    "packaging>=25.0",
+    "scipy>=1.15.3",
+    "setuptools>=80.9.0",
+    "tensorboard>=2.20.0",
+    "torch==2.5.0+cu124",
+    "torchinfo>=1.8.0",
+    "torchvision==0.20.0+cu124",
+    "tqdm>=4.67.1",
+    "transformers>=4.53.1",
+    "wandb>=0.21.0",
+    "wheel>=0.45.1",
+]
+
+[tool.uv.sources]
+torch = { index = "torch-cuda" }
+torchvision = { index = "torch-cuda" }
+
+[[tool.uv.index]]
+name = "torch-cuda"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[project.optional-dependencies]
+build = ["torch", "setuptools", "packaging"]
+compile = ["flash-attn"]
+
+[tool.uv]
+no-build-isolation-package = ["flash-attn"]
+
+[[tool.uv.dependency-metadata]]
+name = "flash-attn"
+version = "2.6.3"
+requires-dist = ["torch", "einops"]
+
+[tool.uv.workspace]
+members = [
+    "ddpm-torch",
+]

@@ -9,6 +9,9 @@ from torch.utils.data import DataLoader, Subset, Sampler
 from torch.utils.data.distributed import DistributedSampler
 from torchvision import transforms, datasets as tvds
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 CSV = namedtuple("CSV", ["header", "index", "data"])
 DATASET_DICT = dict()
 DATASET_INFO = dict()
@@ -59,7 +62,7 @@ class CIFAR10(tvds.CIFAR10):
     test_size = 10000
 
     def __init__(self, root, split="train", transform=None):
-        super().__init__(root=root, train=split != "test", transform=transform or self._transform, download=False)
+        super().__init__(root=root, train=split != "test", transform=transform or self._transform, download=True)
 
     def __getitem__(self, index):
         return super().__getitem__(index)[0]
@@ -181,7 +184,7 @@ class CelebA_HQ(tvds.VisionDataset):
         self.filename = sorted([
             fname
             for fname in os.listdir(os.path.join(root, self.base_folder, "img_celeba_hq"))
-            if fname.endswith(".png")
+            if fname.endswith(".jpg")
         ], key=lambda name: int(name[:-4].zfill(5)))
         np.random.RandomState(123).shuffle(self.filename)  # legacy order used by ProGAN
 
@@ -246,6 +249,7 @@ def get_dataloader(
     dataset_kwargs = {"root": root, "split": split, "transform": transform}
     dataset_kwargs.update({k: v for k, v in kwargs.items() if k in dataset_kwargs})
     dataset = dataset_cls(**dataset_kwargs)
+    print(len(dataset))
 
     if split != "test" and val_size > 0.:
         if hasattr(dataset_info, "train_size") and not hasattr(dataset_info, "val_size"):

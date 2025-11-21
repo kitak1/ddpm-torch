@@ -66,6 +66,7 @@ def train(rank=0, args=None, temp_dir=""):
     model_config["in_channels"] = in_channels * block_size ** 2
     model_config["out_channels"] = out_channels * block_size ** 2
     _model = UNet(**model_config)
+    print(_model.parameters())
 
     if block_size > 1:
         pre_transform = torch.nn.PixelUnshuffle(block_size)  # space-to-depth
@@ -171,7 +172,6 @@ def train(rank=0, args=None, temp_dir=""):
             json.dump(hps, f, indent=2)
         if not os.path.exists(image_dir):
             os.makedirs(image_dir)
-
     trainer = Trainer(
         model=model,
         optimizer=optimizer,

@@ -10,3 +10,5 @@ precomputed
 figs
 images
 chkpts
+slurm_logs
+.venv

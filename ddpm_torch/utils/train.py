@@ -88,6 +88,7 @@ class Trainer:
         self.optimizer = optimizer
         self.diffusion = diffusion
         self.epochs = epochs
+        print(self.epochs)
         self.start_epoch = 0
         self.trainloader = trainloader
         self.sampler = sampler
@@ -195,7 +196,6 @@ class Trainer:
 
         if self.dry_run:
             self.start_epoch, self.epochs = 0, 1
-
         global_steps = 0
         for e in range(self.start_epoch, self.epochs):
             self.stats.reset()

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
+from packaging.version import parse as parse_version # これを追加
 
 try:
     from torchvision.models.utils import load_state_dict_from_url
@@ -14,6 +15,9 @@ FID_WEIGHTS_URL = 'https://github.com/mseitzer/pytorch-fid/releases/download/fid
 
 # torchvision version
 TV_VERSION = torchvision.__version__.split("+")[0]
+print(torchvision.__version__)
+print("aaa")
+# TV_VERSION = "0.20.0"
 TV_VERSION = tuple(map(int, TV_VERSION.split(".")))
 
 

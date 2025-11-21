@@ -22,7 +22,6 @@
     "lr": 2e-5,
     "batch_size": 64,
     "grad_norm": 1.0,
-    "epochs": 1200,
     "warmup": 5000,
     "use_ema": true,
     "ema_decay": 0.9999
